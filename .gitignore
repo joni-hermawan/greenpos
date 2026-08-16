@@ -1,11 +1,27 @@
+# --- General ---
 node_modules/
-.next/
-logs/
-*.log
-.env
-.env.local
-*.zip
-tsconfig.tsbuildinfo
 .DS_Store
 Thumbs.db
+*.log
 *.exe
+.env
+.env.local
+.env*.local
+
+# --- backend (Go) ---
+backend/data/
+backend/*.exe
+backend/Apikey-sandbox-midtrans.txt
+
+# --- backoffice (Next.js) ---
+backoffice/.next/
+backoffice/out/
+backoffice/*.tsbuildinfo
+
+# --- GreenPos (React Native) ---
+GreenPos/android/build/
+GreenPos/android/app/build/
+GreenPos/ios/build/
+GreenPos/ios/Pods/
+GreenPos/**/*.keystore
+!GreenPos/**/debug.keystore

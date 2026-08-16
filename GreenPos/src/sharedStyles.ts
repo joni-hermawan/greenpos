@@ -1,0 +1,130 @@
+import { StyleSheet } from 'react-native';
+import { colors } from './theme';
+
+// Style pieces reused across the 4 kasir screens (header bar, buttons,
+// empty/error states) so each screen file only defines what's unique to it.
+export const shared = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.paper,
+  },
+  centerScreen: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+    backgroundColor: colors.paper,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 10,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.ink,
+  },
+  headerSubtitle: {
+    fontSize: 12,
+    color: colors.inkSoft,
+    marginTop: 2,
+  },
+  logoutLink: {
+    color: colors.alert,
+    fontWeight: '600',
+    fontSize: 13,
+  },
+  searchInput: {
+    marginHorizontal: 16,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#1C1B1826',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    fontSize: 14,
+    backgroundColor: colors.white,
+  },
+  primaryButton: {
+    backgroundColor: colors.leaf,
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  primaryButtonDisabled: {
+    opacity: 0.5,
+  },
+  primaryButtonText: {
+    color: colors.white,
+    fontWeight: '700',
+    fontSize: 15,
+  },
+  secondaryButton: {
+    borderWidth: 1,
+    borderColor: colors.register,
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  secondaryButtonText: {
+    color: colors.register,
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  errorText: {
+    color: colors.alert,
+    fontSize: 12,
+    marginBottom: 8,
+  },
+  emptyBox: {
+    marginTop: 24,
+    marginHorizontal: 16,
+    width: '100%',
+    maxWidth: 640 + 32,
+    alignSelf: 'center',
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: '#1C1B1826',
+    borderRadius: 10,
+    paddingVertical: 32,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+  },
+  emptyTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: colors.ink,
+    marginTop: 8,
+  },
+  emptySubtitle: {
+    fontSize: 12,
+    color: colors.inkSoft,
+    textAlign: 'center',
+    marginTop: 4,
+  },
+  backLink: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.inkSoft,
+    marginBottom: 12,
+  },
+  pickerTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: colors.ink,
+    marginBottom: 6,
+  },
+  pickerSubtitle: {
+    fontSize: 13,
+    color: colors.inkSoft,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+});

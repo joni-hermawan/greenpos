@@ -1,93 +1,76 @@
-# Nota POS — Sistem Kasir Multi-Role
+# GreenPos — Sistem Kasir Mobile Multi-Role
 
-Sistem Point of Sale (POS) full-stack dengan integrasi pembayaran EDC & QRIS, dibangun untuk mendukung operasional retail dari transaksi harian hingga rekonsiliasi keuangan — dengan akses berbeda untuk Kasir, PPIC, Finance, dan Administrator.
+Sistem Point of Sale (POS) berbasis aplikasi mobile dengan integrasi pembayaran EDC & QRIS, ditambah backoffice web untuk manajemen toko dan produk — dengan akses berbeda untuk Kasir, PPIC, Finance, dan Administrator. Rebrand & pengembangan lanjutan dari project sebelumnya, Nota POS.
 
 ## Tentang Project
 
-Nota POS menggabungkan dua hal yang jarang ditemukan bersamaan dalam satu project pribadi: pengalaman langsung di infrastruktur pembayaran (EDC, HSM) dan pengembangan aplikasi full-stack modern. Sistem ini tidak hanya mensimulasikan transaksi kasir, tapi benar-benar berkomunikasi dengan perangkat EDC fisik melalui implementasi protokol serial resmi, serta terintegrasi dengan payment gateway QRIS.
+GreenPos menggabungkan pengalaman langsung di infrastruktur pembayaran (EDC, HSM) dengan pengembangan aplikasi mobile & web modern. Kasir memakai aplikasi mobile React Native, sementara Administrator/Finance mengelola toko, produk, dan laporan lewat backoffice berbasis web — keduanya berbicara ke satu backend Go yang mengimplementasikan protokol EDC dari spesifikasi teknis resmi dan payment gateway QRIS (Midtrans Core API).
 
 ## Fitur Utama
 
 - **Multi-role** — akses berbeda untuk Kasir, PPIC, Finance, dan Administrator
-- **Transaksi pembayaran EDC** — komunikasi langsung ke mesin EDC fisik via serial port (agent lokal terpisah)
-- **Pembayaran QRIS** — integrasi payment gateway (Midtrans)
-- **Cetak struk thermal** — format ESC/POS
-- **Manajemen produk & stok**
-- **Multi-toko / multi-merchant**
-- **Laporan & rekonsiliasi transaksi**
-- **Update real-time** — status transaksi ter-update otomatis di layar kasir via Server-Sent Events
-- **Audit trail & manajemen sesi** — setiap sesi login tercatat di database dan bisa di-revoke paksa
+- **Aplikasi kasir mobile** (React Native, Android & iOS)
+- **Backoffice web** untuk manajemen toko, produk, promo, pengguna, dan laporan (Next.js)
+- **Pembayaran EDC & QRIS** — dua gateway (kartu via EDC, QRIS via Midtrans), masing-masing punya mode simulator (default, tanpa dependency eksternal) dan mode real (spec-accurate, tinggal dikonfigurasi lewat `.env`)
+- **Perhitungan harga, promo, dan stok di server** — client hanya mengirim `{productId, qty}`
+- **Manajemen produk, stok, promo, dan multi-toko**
 
 ## Arsitektur & Tech Stack
 
 | Komponen | Teknologi |
 |---|---|
-| Frontend | Next.js 14 (App Router), Tailwind CSS |
-| Backend | Golang (Clean Architecture), gorilla/mux |
-| Database | SQL Server |
-| Agent EDC | Aplikasi Go terpisah, berjalan di PC kasir, komunikasi via port serial (USB) |
-| Payment Gateway | QRIS (Midtrans) |
+| Aplikasi Kasir | React Native (Android & iOS) |
+| Backoffice | Next.js (App Router), Tailwind CSS |
+| Backend | Golang (Clean Architecture), `net/http` |
+| Penyimpanan | JSON file lokal (tanpa database eksternal) |
+| Payment Gateway | EDC (protokol serial TSD/Prima Vista) & QRIS (Midtrans Core API) |
 
 ```
-nota-pos/
-├── pos-backend/     # API utama (Go)
-├── pos-frontend/     # Aplikasi kasir (Next.js)
-├── nota-edc-agent/  # Agent lokal penghubung ke mesin EDC fisik
-└── database/         # Schema & migrasi SQL Server
+GreenPos root/
+├── GreenPos/     # Aplikasi kasir mobile (React Native)
+├── backend/      # API utama (Go) — auth, transaksi, EDC & QRIS gateway
+├── backoffice/   # Web admin/manajemen (Next.js)
+└── prototype/    # Demo statis (mock, tanpa backend) untuk preview di browser
 ```
 
 ## Highlight Teknis
 
-- **Implementasi protokol EDC dari spesifikasi teknis resmi** (WIDE EDC Whitelabel) — mencakup penyusunan frame data, perhitungan checksum CRC, dan pemetaan kode transaksi untuk berbagai bank & payment provider.
-- **Keamanan sesi tingkat lanjut** — JWT disimpan di cookie `httpOnly` (tidak bisa diakses JavaScript), dan setiap sesi tercatat di database sehingga bisa di-revoke sewaktu-waktu.
-- **Update real-time** via Server-Sent Events, tanpa perlu polling.
+- **Implementasi protokol EDC dari spesifikasi teknis resmi**, mencakup penyusunan frame data, signing ES256, dan pemetaan kode transaksi.
+- **Gateway pembayaran dengan dua implementasi** — simulator deterministik untuk pengembangan, dan client real yang spec-accurate serta inert sampai dikonfigurasi.
 - **Role-based access control** granular per modul dan aksi.
+- **Prototype interaktif tanpa backend** — mock aplikasi mobile & backoffice yang meniru persis tampilan dan alur aslinya, dipakai sebagai live demo publik.
 
 ## Cara Menjalankan
 
-### 1. Database
+### 1. Backend
 ```bash
-sqlcmd -S localhost -U sa -P YourPass -Q "CREATE DATABASE nota_pos"
-sqlcmd -S localhost -U sa -P YourPass -d nota_pos -i database/schema.sql
-```
-
-### 2. Backend
-```bash
-cd pos-backend
-cp .env.example .env
-go mod tidy
+cd backend
+cp .env.example .env   # opsional — isi kredensial Midtrans/EDC nanti
 go run ./cmd/server
 ```
+Berjalan di `:8080`, otomatis mengisi `data/*.json` dengan akun, toko, produk, dan promo demo saat pertama kali dijalankan.
 
-### 3. Frontend
+### 2. Backoffice
 ```bash
-cd pos-frontend
-cp .env.local.example .env.local
+cd backoffice
 npm install
 npm run dev
 ```
 
-### 4. Agent EDC (di PC kasir)
+### 3. Aplikasi Mobile
 ```bash
-cd pos-backend
-set EDC_SERIAL_PORT=COM8
-go run ./cmd/edc-agent
+cd GreenPos
+npm install
+npm run android   # atau: npm run ios
 ```
+Dari Android emulator, aplikasi mengakses backend di `http://10.0.2.2:8080`.
 
-## Login Default
+## Login Demo
 
-| Username | Password | Role |
-|---|---|---|
-| admin01 | password123 | Administrator |
-| kasir01 | password123 | Kasir |
-| ppic01 | password123 | PPIC |
-| finance01 | password123 | Finance |
+Semua akun memakai password `demo123`: `admin01`, `kasir01`, `ppic01`, `finance01`.
 
 *Kredensial demo — wajib diganti sebelum digunakan di lingkungan produksi.*
 
 ## Status & Roadmap
 
-Project ini aktif dikembangkan. Beberapa area yang masih dalam pengembangan lebih lanjut:
-- Upload foto produk saat ini masih preview lokal, belum terhubung ke object storage
-- Command EDC selain Regular Sale (prepaid, cash withdrawal, QR via EDC) sudah punya definisi protokol lengkap, tinggal dihubungkan ke handler transaksi
-- Rekonsiliasi laporan saat ini membandingkan data internal; integrasi dengan sumber data bank/gateway eksternal sedang direncanakan
+Project ini aktif dikembangkan sebagai kelanjutan/rebrand dari Nota POS, dengan fokus baru: aplikasi kasir sebagai native mobile app (bukan lagi web), didampingi backoffice web terpisah untuk manajemen.
